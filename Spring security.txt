@@ -1,0 +1,144 @@
+Spring security
+---------------
+Spring Security is a framework that helps protect your Spring Boot application 
+by handling login, logout, authentication, and authorization automatically.
+
+use of spring security
+Authentication	Confirms who you are (e.g., username/password login).
+Authorization	Decides what you can do (e.g., only admin can delete data).
+Protection	Stops unauthorized access, CSRF attacks, etc.
+Login/Logout	Handles user login and logout automatically.
+
+
+What is HttpSecurity?
+HttpSecurity is a class provided by Spring Security.
+It allows us to customize the security behavior of our web application.
+
+Think of it like a security guard configuration —
+you tell it which doors (URLs) are open to everyone,
+and which doors require a key (login)
+
+What is SecurityFilterChain?
+It is a set of security filters that protect your web app.
+These filters decide:
+who can access which URL,
+when to show the login page,
+how logout works,
+how authentication is checked, etc.
+
+Imagine your app is a college building
+
+| Area           | Who can enter? | Checked by |
+| -------------- | -------------- | ---------- |
+| Front gate     | Anyone         | Guard 1    |
+| Staff room     | Only staff     | Guard 2    |
+| Principal room | Only principal | Guard 3    |
+
+
+These guards together form a “Security Filter Chain”
+
+
+package com.example.securitydemo.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfig {
+
+    // Define which pages need login
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/public").permitAll()  // no login needed
+                .anyRequest().authenticated()            // other pages need login
+            )
+            .formLogin(Customizer.withDefaults())        // enable login form
+            .logout(Customizer.withDefaults());          // enable logout
+        return http.build();
+    }
+
+    // Create a simple in-memory user
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService() {
+        UserDetails user = User.withDefaultPasswordEncoder()
+                .username("student")
+                .password("1234")
+                .roles("USER")
+                .build();
+        return new InMemoryUserDetailsManager(user);
+    }
+}
+
+| Term                  | Simple Meaning                                    |
+| --------------------- | ------------------------------------------------- |
+| `SecurityFilterChain` | A set of security checks for every request        |
+| `HttpSecurity`        | Used to define what rules the chain should follow |
+| `@Bean`               | Registers this security chain in Spring           |
+| `.build()`            | Finalizes and activates the rules                 |
+
+
+| Concept                                   | Explanation                                 |
+| -----------------------------------       | ------------------------------------------- | 
+| `authorizeHttpRequests()`                 | Start setting rules for URLs.               |
+| `.requestMatchers("/public").permitAll()` | “/public” page is open — no login needed.   |
+| `permitAll()`                             | Means anyone can access without login.      |
+| `.anyRequest().authenticated()`           | All other URLs need login.                  |
+| `authenticated()`                         | Means only logged-in users can access.      |
+| `formLogin()`                             | Creates a default login page automatically. |
+| `.logout()`                               | Adds logout support.                        |
+| `InMemoryUserDetailsManager`              | Creates users in memory (no DB).            |
+| `User.withDefaultPasswordEncoder()`       | Simple password encoding (only for demo).   |
+
+*******************************************************************************************
+
+When a request comes to your app:
+
+1. Spring Security checks your rules inside HttpSecurity.
+
+2. If the URL is permitted → request continues.
+
+3. If the URL needs authentication → redirects to login page.
+
+4. After login, Spring Security keeps the session so you can access secure pages.
+
+ HttpSecurity = the security office
+
+.permitAll() = open gate (no ID required)
+
+.authenticated() = locked room (show ID card)
+
+.formLogin() = gate where you show your ID
+
+.logout() = leaving the building safely
+
+
+
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService() {
+
+        //Normal user
+        UserDetails user = User.withDefaultPasswordEncoder()
+                .username("student")
+                .password("1234")
+                .roles("USER")
+                .build();
+
+        //Admin user
+        UserDetails admin = User.withDefaultPasswordEncoder()
+                .username("admin")
+                .password("admin123")
+                .roles("ADMIN")
+                .build();
+
+        return new InMemoryUserDetailsManager(user, admin);
+    }
+}
+
