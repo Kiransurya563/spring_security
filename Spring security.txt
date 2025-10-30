@@ -120,18 +120,45 @@ When a request comes to your app:
 .logout() = leaving the building safely
 
 
+package com.example.securitydemo.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests()
+                .requestMatchers("/public").permitAll()        // open to everyone
+                .requestMatchers("/admin").hasRole("ADMIN")    // only ADMIN can access
+                .anyRequest().authenticated()                  // other URLs need login
+            .and()
+            .formLogin(Customizer.withDefaults())              // default login form
+            .logout(Customizer.withDefaults());                // default logout
+
+        return http.build();
+    }
 
     @Bean
     public InMemoryUserDetailsManager userDetailsService() {
 
-        //Normal user
+        // 👤 Normal user
         UserDetails user = User.withDefaultPasswordEncoder()
                 .username("student")
                 .password("1234")
                 .roles("USER")
                 .build();
 
-        //Admin user
+        // 🛡️ Admin user
         UserDetails admin = User.withDefaultPasswordEncoder()
                 .username("admin")
                 .password("admin123")
@@ -141,4 +168,5 @@ When a request comes to your app:
         return new InMemoryUserDetailsManager(user, admin);
     }
 }
+
 
