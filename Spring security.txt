@@ -168,5 +168,10 @@ public class SecurityConfig {
         return new InMemoryUserDetailsManager(user, admin);
     }
 }
+| Class                          | What it Represents                                              | Simple Analogy                                             |
+| ------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------- |
+| **UserDetails**                | A user’s **information** (username, password, roles)            | Like a *student ID card* (shows who you are)               |
+| **User**                       | A **ready-made implementation** of `UserDetails`                | Like a *standard ID card format* used for all students     |
+| **InMemoryUserDetailsManager** | A **user store (database in memory)** that holds multiple users | Like the *college office* that keeps all students’ records |
 
 
