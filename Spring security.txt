@@ -175,3 +175,6 @@ public class SecurityConfig {
 | **InMemoryUserDetailsManager** | A **user store (database in memory)** that holds multiple users | Like the *college office* that keeps all students’ records |
 
 
+Browser → SecurityFilterChain → InMemoryUserDetailsManager → User(UserDetails)
+->Access granted if valid
+->Denied if not
